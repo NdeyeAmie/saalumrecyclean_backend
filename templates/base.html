@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AdminLTE</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/ionicons.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/AdminLTE.css' %}" rel="stylesheet"/>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        #main-content.htmx-request { opacity: 0.4; transition: opacity 0.2s; }
+        #main-content { transition: opacity 0.15s ease; min-height: 400px; }
+    </style>
+</head>
+<body class="skin-black">
+
+<header class="header">
+    <a href="{% url 'dash_admin:dashboard' %}" class="logo"><b>Admin</b>LTE</a>
+    <nav class="navbar navbar-static-top" role="navigation">
+        <a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+        </a>
+        <div class="navbar-right">
+            <ul class="nav navbar-nav">
+                <li class="dropdown user user-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="glyphicon glyphicon-user"></i>
+                        <span>{{ request.user.username }} <i class="caret"></i></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="user-header bg-light-blue">
+                            <img src="{% static 'img/avatar3.png' %}" class="img-circle" alt=""/>
+                            <p>{{ request.user.username }}<small>Administrateur</small></p>
+                        </li>
+                        <li class="user-footer">
+                            <div class="pull-right">
+                                <a href="{% url 'dash_admin:logout' %}" class="btn btn-default btn-flat">
+                                    <i class="fa fa-sign-out"></i> Déconnexion
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div class="wrapper row-offcanvas row-offcanvas-left">
+    <aside class="left-side sidebar-offcanvas">
+        <section class="sidebar">
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="{% static 'img/avatar3.png' %}" class="img-circle" alt=""/>
+                </div>
+                <div class="pull-left info">
+                    <p>Hello, {{ request.user.username }}</p>
+                    <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu" id="sidebar-menu">
+                <li id="nav-dashboard" {% block nav_dashboard %}{% endblock %}>
+                    <a href="{% url 'dash_admin:dashboard' %}"
+                       hx-get="{% url 'dash_admin:dashboard' %}"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       hx-swap="innerHTML"
+                       onclick="setActive('nav-dashboard')">
+                        <i class="fa fa-dashboard"></i><span>Dashboard</span>
+                    </a>
+                </li>
+                <li id="nav-ajout" {% block nav_ajout %}{% endblock %}>
+                    <a href="{% url 'dash_admin:ajout_article' %}"
+                       hx-get="{% url 'dash_admin:ajout_article' %}"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       hx-swap="innerHTML"
+                       onclick="setActive('nav-ajout')">
+                        <i class="fa fa-plus-circle"></i><span>Ajouter un Article</span>
+                    </a>
+                </li>
+                <li id="nav-liste" {% block nav_liste %}{% endblock %}>
+                    <a href="{% url 'dash_admin:liste_articles' %}"
+                       hx-get="{% url 'dash_admin:liste_articles' %}"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       hx-swap="innerHTML"
+                       onclick="setActive('nav-liste')">
+                        <i class="fa fa-list"></i><span>Liste des Articles</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'dash_admin:logout' %}">
+                        <i class="fa fa-sign-out"></i><span>Déconnexion</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+    </aside>
+
+    <aside class="right-side">
+        <div id="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </aside>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/AdminLTE/app.js' %}"></script>
+<script>
+    function setActive(navId) {
+        document.querySelectorAll('#sidebar-menu > li').forEach(li => li.classList.remove('active'));
+        const el = document.getElementById(navId);
+        if (el) el.classList.add('active');
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const p = window.location.pathname;
+        if      (p.includes('ajout'))    setActive('nav-ajout');
+        else if (p.includes('liste') || p.includes('voir') || p.includes('modifier')) setActive('nav-liste');
+        else    setActive('nav-dashboard');
+    });
+</script>
+</body>
+</html>

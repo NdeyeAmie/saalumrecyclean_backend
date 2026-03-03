@@ -1,0 +1,104 @@
+{% load static %}
+
+<section class="content-header">
+    <h1>Ajouter un Article <small>Événement / Blog</small></h1>
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'dash_admin:dashboard' %}"
+               hx-get="{% url 'dash_admin:dashboard' %}"
+               hx-target="#main-content" hx-push-url="true"
+               onclick="setActive('nav-dashboard')">
+                <i class="fa fa-dashboard"></i> Home
+            </a>
+        </li>
+        <li class="active">Ajouter un Article</li>
+    </ol>
+</section>
+
+<section class="content">
+
+    {% if message == 'success' %}
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fa fa-check-circle"></i> <strong>Article ajouté avec succès !</strong>
+        <a href="{% url 'dash_admin:liste_articles' %}"
+           hx-get="{% url 'dash_admin:liste_articles' %}"
+           hx-target="#main-content" hx-push-url="true"
+           onclick="setActive('nav-liste')"
+           class="btn btn-sm btn-success" style="margin-left:15px;">
+            <i class="fa fa-list"></i> Voir la liste
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-pencil"></i> Nouvel Article</h3>
+                </div>
+                <form method="POST"
+                      action="{% url 'dash_admin:ajout_article' %}"
+                      enctype="multipart/form-data"
+                      hx-post="{% url 'dash_admin:ajout_article' %}"
+                      hx-target="#main-content"
+                      hx-swap="innerHTML"
+                      hx-encoding="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="box-body">
+                        <div class="form-group {% if form.titre.errors %}has-error{% endif %}">
+                            <label><i class="fa fa-header"></i> Titre <span class="text-red">*</span></label>
+                            {{ form.titre }}
+                            {% for err in form.titre.errors %}<span class="help-block">{{ err }}</span>{% endfor %}
+                        </div>
+                        <div class="form-group {% if form.date_event.errors %}has-error{% endif %}">
+                            <label><i class="fa fa-calendar"></i> Date de l'événement <span class="text-red">*</span></label>
+                            {{ form.date_event }}
+                            {% for err in form.date_event.errors %}<span class="help-block">{{ err }}</span>{% endfor %}
+                        </div>
+                        <div class="form-group {% if form.description.errors %}has-error{% endif %}">
+                            <label><i class="fa fa-align-left"></i> Description <span class="text-red">*</span></label>
+                            {{ form.description }}
+                            {% for err in form.description.errors %}<span class="help-block">{{ err }}</span>{% endfor %}
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa fa-image"></i> Image</label>
+                            {{ form.image }}
+                            <p class="help-block">Formats acceptés : JPG, PNG, GIF</p>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i> Enregistrer
+                        </button>
+                        <button type="reset" class="btn btn-default">
+                            <i class="fa fa-times"></i> Réinitialiser
+                        </button>
+                        <a href="{% url 'dash_admin:liste_articles' %}"
+                           hx-get="{% url 'dash_admin:liste_articles' %}"
+                           hx-target="#main-content" hx-push-url="true"
+                           onclick="setActive('nav-liste')"
+                           class="btn btn-default pull-right">
+                            <i class="fa fa-list"></i> Voir la liste
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-info-circle"></i> Aide</h3>
+                </div>
+                <div class="box-body">
+                    <p><i class="fa fa-asterisk text-red"></i> Champs obligatoires</p>
+                    <hr>
+                    <p><i class="fa fa-header text-blue"></i> <strong>Titre</strong> : nom de l'événement.</p>
+                    <p><i class="fa fa-calendar text-green"></i> <strong>Date</strong> : quand se déroule l'événement.</p>
+                    <p><i class="fa fa-align-left text-yellow"></i> <strong>Description</strong> : contenu complet.</p>
+                    <p><i class="fa fa-image" style="color:purple;"></i> <strong>Image</strong> : photo illustrative (optionnel).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,144 @@
+{% load static %}
+{# PARTIAL : pas de {% extends %}, pas de {% block %} #}
+
+<section class="content-header">
+    <h1>Liste des Articles <small>{{ articles|length }} article{{ articles|length|pluralize }}</small></h1>
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'dash_admin:dashboard' %}"
+               hx-get="{% url 'dash_admin:dashboard' %}"
+               hx-target="#main-content" hx-push-url="true"
+               onclick="setActive('nav-dashboard')">
+                <i class="fa fa-dashboard"></i> Home
+            </a>
+        </li>
+        <li class="active">Liste des Articles</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div style="margin-bottom:15px;">
+        <a href="{% url 'dash_admin:ajout_article' %}"
+           hx-get="{% url 'dash_admin:ajout_article' %}"
+           hx-target="#main-content" hx-push-url="true"
+           onclick="setActive('nav-ajout')"
+           class="btn btn-primary">
+            <i class="fa fa-plus"></i> Ajouter un Article
+        </a>
+    </div>
+
+    {% if articles %}
+    <div class="row">
+        {% for article in articles %}
+        <div class="col-md-4 col-sm-6" style="margin-bottom:25px;">
+            <div class="box box-widget" style="border-radius:6px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.12);">
+                {% if article.image %}
+                <div style="height:200px;overflow:hidden;position:relative;">
+                    <img src="{{ article.image.url }}" alt="{{ article.titre }}"
+                         style="width:100%;height:200px;object-fit:cover;display:block;">
+                    <span class="label label-primary"
+                          style="position:absolute;top:10px;right:10px;font-size:11px;padding:4px 8px;">
+                        <i class="fa fa-calendar"></i> {{ article.date_event|date:"d/m/Y" }}
+                    </span>
+                </div>
+                {% else %}
+                <div style="height:200px;background:#ecf0f1;display:flex;flex-direction:column;
+                            align-items:center;justify-content:center;position:relative;">
+                    <i class="fa fa-image fa-4x" style="color:#bdc3c7;"></i>
+                    <p style="color:#95a5a6;margin-top:8px;font-size:13px;">Pas d'image</p>
+                    <span class="label label-primary"
+                          style="position:absolute;top:10px;right:10px;font-size:11px;padding:4px 8px;">
+                        <i class="fa fa-calendar"></i> {{ article.date_event|date:"d/m/Y" }}
+                    </span>
+                </div>
+                {% endif %}
+                <div style="padding:14px;">
+                    <h4 style="margin:0 0 6px;font-size:16px;font-weight:600;color:#2c3e50;">{{ article.titre }}</h4>
+                    <p style="font-size:13px;color:#7f8c8d;line-height:1.5;margin-bottom:8px;">
+                        {{ article.description|truncatechars:100 }}
+                    </p>
+                    <small class="text-muted">
+                        <i class="fa fa-clock-o"></i> {{ article.created_at|date:"d/m/Y à H:i" }}
+                    </small>
+                </div>
+                <div style="padding:10px 14px;border-top:1px solid #f0f0f0;background:#fafafa;
+                            display:flex;gap:6px;justify-content:flex-end;">
+                    <a href="{% url 'dash_admin:voir_article' article.pk %}"
+                       hx-get="{% url 'dash_admin:voir_article' article.pk %}"
+                       hx-target="#main-content" hx-push-url="true" hx-swap="innerHTML"
+                       onclick="setActive('nav-liste')" class="btn btn-xs btn-info">
+                        <i class="fa fa-eye"></i> Voir
+                    </a>
+                    <a href="{% url 'dash_admin:modifier_article' article.pk %}"
+                       hx-get="{% url 'dash_admin:modifier_article' article.pk %}"
+                       hx-target="#main-content" hx-push-url="true" hx-swap="innerHTML"
+                       onclick="setActive('nav-liste')" class="btn btn-xs btn-warning">
+                        <i class="fa fa-edit"></i> Modifier
+                    </a>
+                   <button type="button" class="btn btn-xs btn-danger" 
+                      data-pk="{{ article.pk }}" data-titre="{{ article.titre|escapejs }}"onclick="ouvrirModalSuppression(this.dataset.pk, this.dataset.titre)">
+                      <i class="fa fa-trash"></i> Supprimer
+                 </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="box box-default">
+        <div class="box-body text-center" style="padding:60px;">
+            <i class="fa fa-inbox fa-5x text-muted"></i>
+            <h3 class="text-muted" style="margin-top:20px;">Aucun article pour l'instant</h3>
+            <a href="{% url 'dash_admin:ajout_article' %}"
+               hx-get="{% url 'dash_admin:ajout_article' %}"
+               hx-target="#main-content" hx-push-url="true"
+               onclick="setActive('nav-ajout')"
+               class="btn btn-primary btn-lg" style="margin-top:15px;">
+                <i class="fa fa-plus"></i> Créer le premier article
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Modal suppression -->
+<div class="modal fade" id="modal-suppression" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#e74c3c;color:#fff;border-radius:4px 4px 0 0;">
+                <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:1;">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-warning"></i> Confirmer la suppression</h4>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous vraiment supprimer :</p>
+                <p><strong id="titre-a-supprimer" style="color:#e74c3c;"></strong></p>
+                <p class="text-muted"><small>Cette action est irréversible.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <i class="fa fa-times"></i> Annuler
+                </button>
+                <form id="form-suppression" method="POST"
+                      hx-target="#main-content" hx-swap="innerHTML" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"
+                            onclick="$('#modal-suppression').modal('hide');">
+                        <i class="fa fa-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function ouvrirModalSuppression(pk, titre) {
+    document.getElementById('titre-a-supprimer').textContent = titre;
+    const form = document.getElementById('form-suppression');
+    const url  = '/dash_admin/articles/supprimer/' + pk + '/';
+    form.action = url;
+    form.setAttribute('hx-post', url);
+    htmx.process(form);
+    $('#modal-suppression').modal('show');
+}
+</script>
