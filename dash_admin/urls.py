@@ -12,4 +12,5 @@ urlpatterns = [
     path('articles/supprimer/<int:pk>/', views.supprimer_article, name='supprimer_article'),
     path('login/',                       views.login_view,        name='login'),
     path('logout/',                      views.logout_view,       name='logout'),
+    path('api/articles/', views.api_articles, name='api_articles'),
 ]

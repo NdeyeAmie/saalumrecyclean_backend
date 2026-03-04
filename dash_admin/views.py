@@ -3,8 +3,24 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import Article
 from .forms  import ArticleForm
+from django.http import JsonResponse
 
 
+# ── API JSON pour React ───────────────────────────────────────────────────────
+
+
+def api_articles(request):
+    articles = Article.objects.all()
+    data = []
+    for article in articles:
+        data.append({
+            'id': article.id,
+            'titre': article.titre,
+            'description': article.description,
+            'date_event': article.date_event.strftime('%d %B').upper(),
+            'image': request.build_absolute_uri(article.image.url) if article.image else None,
+        })
+    return JsonResponse(data, safe=False)
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 def login_view(request):
