@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
     "saalumrecycleanbackend-production.up.railway.app",
     "127.0.0.1",
     "localhost",
-]
+]    
 
 # CSRF (Cross Site Request Forgery)
 CSRF_TRUSTED_ORIGINS = [
