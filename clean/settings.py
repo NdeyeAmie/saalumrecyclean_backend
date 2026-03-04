@@ -88,7 +88,7 @@ if DB_LIVE in ['False', False]:
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+    
 else:
     DATABASES = {
     'default': {
