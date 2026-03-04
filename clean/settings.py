@@ -29,7 +29,10 @@ SECRET_KEY = 'django-insecure-o1=*ph#8+8axk=ys6w^p$oei1iyx(&x#d5(mm@598k5fdxk#^6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://saalumrecycleanbackend-production.up.railway.app",
+    "http://127.0.0.1:8000",  # si vous testez en local
+]
 
 
 # Application definition
