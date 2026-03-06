@@ -1,0 +1,190 @@
+<div class="container-fluid" style="padding:20px;">
+
+  <!-- En-tête -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <div>
+      <h4 style="margin:0 0 4px 0;font-weight:700;">
+        <i class="fa fa-newspaper-o" style="color:#3c8dbc;margin-right:8px;"></i>Articles de blog
+      </h4>
+      <p style="margin:0;color:#999;font-size:13px;">
+        {{ total }} article{% if total > 1 %}s{% endif %} publié{% if total > 1 %}s{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'dash_admin:ajout_blog' %}"
+       hx-get="{% url 'dash_admin:ajout_blog' %}"
+       hx-target="#main-content"
+       hx-push-url="true"
+       hx-swap="innerHTML"
+       onclick="setActive('nav-blog-ajout')"
+       class="btn btn-primary btn-sm">
+      <i class="fa fa-plus"></i> Nouvel article
+    </a>
+  </div>
+
+  <!-- Tableau -->
+  <div class="box box-primary" style="margin-bottom:0;">
+    <div class="box-body" style="padding:0;">
+      {% if posts %}
+      <table class="table table-bordered table-hover" style="margin-bottom:0;">
+        <thead style="background:#f4f4f4;">
+          <tr>
+            <th style="width:55px;text-align:center;">Image</th>
+            <th>Titre</th>
+            <th style="width:130px;">Catégorie</th>
+            <th style="width:100px;">Tag</th>
+            <th style="width:120px;">Date</th>
+            <th style="width:70px;text-align:center;">⭐</th>
+            <th style="width:120px;text-align:center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in posts %}
+          <tr>
+
+            <!-- Image -->
+            <td style="text-align:center;vertical-align:middle;padding:8px;">
+              {% if post.image %}
+                <img src="{{ post.image.url }}" alt=""
+                     style="width:40px;height:40px;object-fit:cover;border-radius:4px;display:block;margin:auto;">
+              {% else %}
+                <div style="width:40px;height:40px;background:#eee;border-radius:4px;
+                            display:flex;align-items:center;justify-content:center;margin:auto;">
+                  <i class="fa fa-image" style="color:#aaa;"></i>
+                </div>
+              {% endif %}
+            </td>
+
+            <!-- Titre + accroche -->
+            <td style="vertical-align:middle;">
+              <strong style="display:block;">{{ post.titre }}</strong>
+              <span style="color:#999;font-size:12px;">
+                {{ post.excerpt|truncatechars:70 }}
+              </span>
+            </td>
+
+            <!-- Catégorie -->
+            <td style="vertical-align:middle;">
+              <span class="label label-default">{{ post.categorie_display }}</span>
+            </td>
+
+            <!-- Tag -->
+            <td style="vertical-align:middle;">
+              <span class="label label-info">{{ post.tag_display }}</span>
+            </td>
+
+            <!-- Date -->
+            <td style="vertical-align:middle;font-size:12px;color:#777;">
+              {{ post.date_formatee }}
+            </td>
+
+            <!-- Vedette -->
+            <td style="text-align:center;vertical-align:middle;">
+              {% if post.en_vedette %}
+                <i class="fa fa-star" style="color:#f39c12;font-size:16px;" title="En vedette"></i>
+              {% else %}
+                <i class="fa fa-star-o" style="color:#ccc;font-size:16px;"></i>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td style="text-align:center;vertical-align:middle;white-space:nowrap;">
+
+              <!-- Voir -->
+              <a href="{% url 'dash_admin:voir_blog' post.pk %}"
+                 hx-get="{% url 'dash_admin:voir_blog' post.pk %}"
+                 hx-target="#main-content"
+                 hx-push-url="true"
+                 hx-swap="innerHTML"
+                 style="display:inline-block;padding:4px 8px;background:#f4f4f4;
+                        border:1px solid #ddd;border-radius:3px;color:#444;
+                        text-decoration:none;margin-right:2px;"
+                 title="Voir">
+                <i class="fa fa-eye"></i>
+              </a>
+
+              <!-- Modifier -->
+              <a href="{% url 'dash_admin:modifier_blog' post.pk %}"
+                 hx-get="{% url 'dash_admin:modifier_blog' post.pk %}"
+                 hx-target="#main-content"
+                 hx-push-url="true"
+                 hx-swap="innerHTML"
+                 style="display:inline-block;padding:4px 8px;background:#0073b7;
+                        border:1px solid #0073b7;border-radius:3px;color:#fff;
+                        text-decoration:none;margin-right:2px;"
+                 title="Modifier">
+                <i class="fa fa-pencil"></i>
+              </a>
+
+              <!-- Supprimer -->
+              <button type="button"
+                      onclick="confirmerSuppression('{{ post.pk }}', '{{ post.titre|escapejs }}')"
+                      style="display:inline-block;padding:4px 8px;background:#dd4b39;
+                             border:1px solid #dd4b39;border-radius:3px;color:#fff;
+                             cursor:pointer;"
+                      title="Supprimer">
+                <i class="fa fa-trash"></i>
+              </button>
+
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% else %}
+      <div style="text-align:center;padding:60px 0;">
+        <i class="fa fa-newspaper-o fa-3x" style="color:#ddd;"></i>
+        <p style="color:#aaa;margin-top:16px;margin-bottom:16px;">Aucun article de blog pour l'instant.</p>
+        <a href="{% url 'dash_admin:ajout_blog' %}"
+           hx-get="{% url 'dash_admin:ajout_blog' %}"
+           hx-target="#main-content"
+           hx-push-url="true"
+           hx-swap="innerHTML"
+           onclick="setActive('nav-blog-ajout')"
+           class="btn btn-primary btn-sm">
+          <i class="fa fa-plus"></i> Créer le premier article
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Modal suppression -->
+<div class="modal fade" id="modalSupprimer" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#dd4b39;">
+        <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:1;">&times;</button>
+        <h4 class="modal-title" style="color:#fff;">
+          <i class="fa fa-warning"></i> Confirmer la suppression
+        </h4>
+      </div>
+      <div class="modal-body">
+        <p>Vous êtes sur le point de supprimer :</p>
+        <p><strong id="titreSuppression" style="font-size:15px;"></strong></p>
+        <div class="alert alert-danger" style="margin-bottom:0;">
+          <i class="fa fa-info-circle"></i>
+          Cette action est <strong>irréversible</strong>. L'image associée sera également supprimée.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        <form method="post" id="formSupprimer" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fa fa-trash"></i> Supprimer définitivement
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmerSuppression(pk, titre) {
+  document.getElementById('titreSuppression').textContent = titre;
+  document.getElementById('formSupprimer').action = '/dash_admin/blog/supprimer/' + pk + '/';
+  $('#modalSupprimer').modal('show');
+}
+</script>

@@ -1,0 +1,206 @@
+<div class="container-fluid py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="mb-1 fw-bold">
+        <i class="fa fa-pencil me-2" style="color:#3c8dbc;"></i>Nouvel article de blog
+      </h4>
+      <ol class="breadcrumb small" style="background:transparent;padding:0;margin:0;">
+        <li><span class="text-muted">Dashboard</span></li>
+        <li>
+          <a href="{% url 'dash_admin:liste_blog' %}"
+             hx-get="{% url 'dash_admin:liste_blog' %}"
+             hx-target="#main-content"
+             hx-push-url="true"
+             hx-swap="innerHTML"
+             onclick="setActive('nav-blog-liste')"
+             class="text-muted">Blog</a>
+        </li>
+        <li class="active">Ajouter</li>
+      </ol>
+    </div>
+    <a href="{% url 'dash_admin:liste_blog' %}"
+       hx-get="{% url 'dash_admin:liste_blog' %}"
+       hx-target="#main-content"
+       hx-push-url="true"
+       hx-swap="innerHTML"
+       onclick="setActive('nav-blog-liste')"
+       class="btn btn-default btn-sm">
+      <i class="fa fa-arrow-left me-1"></i> Retour à la liste
+    </a>
+  </div>
+
+  <!-- Erreurs globales -->
+  {% if message == 'error' %}
+  <div class="alert alert-danger alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <i class="fa fa-exclamation-triangle me-1"></i>
+    <strong>Erreur :</strong> Veuillez corriger les champs ci-dessous avant de publier.
+  </div>
+  {% endif %}
+
+  <!-- ✅ UN SEUL formulaire englobant les deux colonnes -->
+  <form method="post"
+        enctype="multipart/form-data"
+        action="{% url 'dash_admin:ajout_blog' %}"
+        id="blogForm">
+    {% csrf_token %}
+
+    <div class="row">
+
+      <!-- Colonne gauche : contenu -->
+      <div class="col-md-8">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-file-text me-2"></i>Contenu</h3>
+          </div>
+          <div class="box-body">
+
+            <div class="form-group {% if form.titre.errors %}has-error{% endif %}">
+              <label>Titre <span class="text-red">*</span></label>
+              {{ form.titre }}
+              {% if form.titre.errors %}
+                <span class="help-block"><i class="fa fa-times-circle me-1"></i>{{ form.titre.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+
+            <div class="form-group {% if form.excerpt.errors %}has-error{% endif %}">
+              <label>Accroche <span class="text-red">*</span></label>
+              <small class="text-muted"> — résumé court affiché sur la carte (max 400 caractères)</small>
+              {{ form.excerpt }}
+              {% if form.excerpt.errors %}
+                <span class="help-block"><i class="fa fa-times-circle me-1"></i>{{ form.excerpt.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+
+            <div class="form-group {% if form.contenu.errors %}has-error{% endif %}">
+              <label>Contenu complet <span class="text-red">*</span></label>
+              <small class="text-muted"> — séparez les paragraphes par une ligne vide</small>
+              {{ form.contenu }}
+              {% if form.contenu.errors %}
+                <span class="help-block"><i class="fa fa-times-circle me-1"></i>{{ form.contenu.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite : paramètres dans le MÊME <form> -->
+      <div class="col-md-4">
+
+        <div class="box box-default">
+          <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-cog me-2"></i>Paramètres</h3>
+          </div>
+          <div class="box-body">
+
+            <div class="form-group {% if form.categorie.errors %}has-error{% endif %}">
+              <label>Catégorie <span class="text-red">*</span></label>
+              {{ form.categorie }}
+              {% if form.categorie.errors %}
+                <span class="help-block"><i class="fa fa-times-circle me-1"></i>{{ form.categorie.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label>Tag affiché</label>
+              {{ form.tag }}
+            </div>
+
+            <div class="form-group {% if form.date_pub.errors %}has-error{% endif %}">
+              <label>Date de publication <span class="text-red">*</span></label>
+              {{ form.date_pub }}
+              {% if form.date_pub.errors %}
+                <span class="help-block"><i class="fa fa-times-circle me-1"></i>{{ form.date_pub.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label>Temps de lecture</label>
+              <div class="input-group">
+                {{ form.read_time }}
+                <span class="input-group-addon">min</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="checkbox">
+                <label>
+                  {{ form.en_vedette }}
+                  <i class="fa fa-star" style="color:#f39c12;"></i> Mettre en vedette
+                </label>
+              </div>
+              <small class="text-muted">Affiché en grand format en haut du blog.</small>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="box box-default">
+          <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-image me-2"></i>Image de couverture</h3>
+          </div>
+          <div class="box-body">
+            <div id="imagePreviewWrap" style="display:none;margin-bottom:12px;">
+              <img id="imagePreview" src="#" alt="Aperçu"
+                   style="max-height:180px;width:100%;object-fit:cover;border-radius:4px;">
+            </div>
+            <div id="imagePlaceholder"
+                 style="height:110px;border:2px dashed #ddd;border-radius:4px;
+                        display:flex;flex-direction:column;align-items:center;
+                        justify-content:center;background:#f9f9f9;margin-bottom:12px;cursor:pointer;"
+                 onclick="document.getElementById('{{ form.image.id_for_label }}').click()">
+              <i class="fa fa-cloud-upload fa-2x text-muted"></i>
+              <span class="small text-muted" style="margin-top:6px;">Cliquer pour choisir</span>
+            </div>
+            {{ form.image }}
+            <small class="text-muted">JPG, PNG, WEBP — Max 5 Mo</small>
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="box box-default">
+          <div class="box-body">
+            <button type="submit" class="btn btn-primary btn-block" style="margin-bottom:8px;">
+              <i class="fa fa-save me-1"></i> Publier l'article
+            </button>
+            <a href="{% url 'dash_admin:liste_blog' %}"
+               hx-get="{% url 'dash_admin:liste_blog' %}"
+               hx-target="#main-content"
+               hx-push-url="true"
+               hx-swap="innerHTML"
+               onclick="setActive('nav-blog-liste')"
+               class="btn btn-default btn-block">
+              Annuler
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </form>
+
+</div>
+
+<script>
+(function () {
+  var fileInput = document.querySelector('#blogForm input[type="file"]');
+  if (fileInput) {
+    fileInput.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          document.getElementById('imagePreview').src = ev.target.result;
+          document.getElementById('imagePreviewWrap').style.display = 'block';
+          document.getElementById('imagePlaceholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+})();
+</script>

@@ -1,27 +1,72 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Article
-from .forms  import ArticleForm
 from django.http import JsonResponse
+from .models import Article, BlogPost
+from .forms  import ArticleForm, BlogPostForm
+import os
 
 
-# ── API JSON pour React ───────────────────────────────────────────────────────
-
+# ══════════════════════════════════════════════════════════════════════════════
+# API JSON  (consommées par React)
+# ══════════════════════════════════════════════════════════════════════════════
 
 def api_articles(request):
     articles = Article.objects.all()
     data = []
     for article in articles:
         data.append({
-            'id': article.id,
-            'titre': article.titre,
+            'id':          article.id,
+            'titre':       article.titre,
             'description': article.description,
-            'date_event': article.date_event.strftime('%d %B').upper(),
-            'image': request.build_absolute_uri(article.image.url) if article.image else None,
+            'date_event':  article.date_event.strftime('%d %B').upper(),
+            'image':       request.build_absolute_uri(article.image.url) if article.image else None,
         })
     return JsonResponse(data, safe=False)
-# ── Auth ──────────────────────────────────────────────────────────────────────
+
+
+def api_blog(request):
+    posts     = BlogPost.objects.all()
+    categorie = request.GET.get('categorie')
+    if categorie and categorie != 'tous':
+        posts = posts.filter(categorie=categorie)
+    data = []
+    for post in posts:
+        data.append({
+            'id':         post.id,
+            'titre':      post.titre,
+            'excerpt':    post.excerpt,
+            'contenu':    post.contenu,
+            'categorie':  post.categorie_display,
+            'tag':        post.tag_display,
+            'readTime':   f"{post.read_time} min",
+            'date':       post.date_formatee,
+            'image':      request.build_absolute_uri(post.image.url) if post.image else None,
+            'en_vedette': post.en_vedette,
+        })
+    return JsonResponse(data, safe=False)
+
+
+def api_blog_detail(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+    data = {
+        'id':         post.id,
+        'titre':      post.titre,
+        'excerpt':    post.excerpt,
+        'contenu':    post.contenu,
+        'categorie':  post.categorie_display,
+        'tag':        post.tag_display,
+        'readTime':   f"{post.read_time} min",
+        'date':       post.date_formatee,
+        'image':      request.build_absolute_uri(post.image.url) if post.image else None,
+        'en_vedette': post.en_vedette,
+    }
+    return JsonResponse(data)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Auth
+# ══════════════════════════════════════════════════════════════════════════════
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -45,38 +90,44 @@ def logout_view(request):
     return redirect('dash_admin:login')
 
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# Dashboard
+# ══════════════════════════════════════════════════════════════════════════════
 
 @login_required
 def dashboard(request):
-    articles = Article.objects.all()
-    context  = {'articles': articles, 'total': articles.count()}
+    articles   = Article.objects.all()
+    blog_posts = BlogPost.objects.all()
+    context    = {
+        'articles':        articles,
+        'total':           articles.count(),
+        'blog_posts':      blog_posts,
+        'total_blog':      blog_posts.count(),
+    }
     if request.headers.get('HX-Request'):
         return render(request, 'pages/dashboard_partial.html', context)
     return render(request, 'index.html', context)
 
 
-# ── Article : Ajout ───────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# Articles (Événements)
+# ══════════════════════════════════════════════════════════════════════════════
 
 @login_required
 def ajout_article(request):
     form    = ArticleForm()
     message = None
-
     if request.method == 'POST':
         form = ArticleForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             message = 'success'
             form    = ArticleForm()
-
     context = {'form': form, 'message': message}
     if request.headers.get('HX-Request'):
         return render(request, 'pages/ajout_article_partial.html', context)
     return render(request, 'pages/ajout_article.html', context)
 
-
-# ── Article : Liste ───────────────────────────────────────────────────────────
 
 @login_required
 def liste_articles(request):
@@ -87,8 +138,6 @@ def liste_articles(request):
     return render(request, 'pages/liste_articles.html', context)
 
 
-# ── Article : Voir détail ─────────────────────────────────────────────────────
-
 @login_required
 def voir_article(request, pk):
     article = get_object_or_404(Article, pk=pk)
@@ -98,41 +147,112 @@ def voir_article(request, pk):
     return render(request, 'pages/voir_article.html', context)
 
 
-# ── Article : Modifier ────────────────────────────────────────────────────────
-
 @login_required
 def modifier_article(request, pk):
     article = get_object_or_404(Article, pk=pk)
     form    = ArticleForm(instance=article)
     message = None
-
     if request.method == 'POST':
         form = ArticleForm(request.POST, request.FILES, instance=article)
         if form.is_valid():
             form.save()
             message = 'success'
-
     context = {'form': form, 'article': article, 'message': message}
     if request.headers.get('HX-Request'):
         return render(request, 'pages/modifier_article_partial.html', context)
     return render(request, 'pages/modifier_article.html', context)
 
 
-# ── Article : Supprimer ───────────────────────────────────────────────────────
-
 @login_required
 def supprimer_article(request, pk):
     article = get_object_or_404(Article, pk=pk)
     if request.method == 'POST':
-        # Supprimer aussi le fichier image du disque
-        if article.image:
-            import os
-            if os.path.isfile(article.image.path):
-                os.remove(article.image.path)
+        if article.image and os.path.isfile(article.image.path):
+            os.remove(article.image.path)
         article.delete()
-        # Retourner la liste mise à jour via HTMX
         articles = Article.objects.all()
         if request.headers.get('HX-Request'):
             return render(request, 'pages/liste_articles_partial.html', {'articles': articles})
         return redirect('dash_admin:liste_articles')
     return redirect('dash_admin:liste_articles')
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Blog
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def liste_blog(request):
+    posts   = BlogPost.objects.all()
+    context = {'posts': posts, 'total': posts.count()}
+    if request.headers.get('HX-Request'):
+        return render(request, 'pages/liste_blog_partial.html', context)
+    return render(request, 'pages/liste_blog.html', context)
+
+
+@login_required
+def ajout_blog(request):
+    form    = BlogPostForm()
+    message = None
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            # Après succès : rediriger vers la liste
+            from django.http import HttpResponse
+            if request.headers.get('HX-Request'):
+                response = HttpResponse()
+                response['HX-Redirect'] = '/dash_admin/blog/liste/'
+                return response
+            return redirect('dash_admin:liste_blog')
+        # Formulaire invalide : rester sur la page avec les erreurs
+        message = 'error'
+    context = {'form': form, 'message': message}
+    if request.headers.get('HX-Request'):
+        return render(request, 'pages/ajout_blog_partial.html', context)
+    return render(request, 'pages/ajout_blog.html', context)
+
+
+@login_required
+def voir_blog(request, pk):
+    post    = get_object_or_404(BlogPost, pk=pk)
+    context = {'post': post}
+    if request.headers.get('HX-Request'):
+        return render(request, 'pages/voir_blog_partial.html', context)
+    return render(request, 'pages/voir_blog.html', context)
+
+
+@login_required
+def modifier_blog(request, pk):
+    post    = get_object_or_404(BlogPost, pk=pk)
+    form    = BlogPostForm(instance=post)
+    message = None
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            from django.http import HttpResponse
+            if request.headers.get('HX-Request'):
+                response = HttpResponse()
+                response['HX-Redirect'] = f'/dash_admin/blog/voir/{pk}/'
+                return response
+            return redirect('dash_admin:voir_blog', pk=pk)
+        message = 'error'
+    context = {'form': form, 'post': post, 'message': message}
+    if request.headers.get('HX-Request'):
+        return render(request, 'pages/modifier_blog_partial.html', context)
+    return render(request, 'pages/modifier_blog.html', context)
+
+
+@login_required
+def supprimer_blog(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == 'POST':
+        if post.image and os.path.isfile(post.image.path):
+            os.remove(post.image.path)
+        post.delete()
+        posts = BlogPost.objects.all()
+        if request.headers.get('HX-Request'):
+            return render(request, 'pages/liste_blog_partial.html', {'posts': posts})
+        return redirect('dash_admin:liste_blog')
+    return redirect('dash_admin:liste_blog')

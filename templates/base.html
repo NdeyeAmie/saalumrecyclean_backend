@@ -64,7 +64,9 @@
             </div>
 
             <ul class="sidebar-menu" id="sidebar-menu">
-                <li id="nav-dashboard" {% block nav_dashboard %}{% endblock %}>
+
+                <!-- Dashboard -->
+                <li id="nav-dashboard">
                     <a href="{% url 'dash_admin:dashboard' %}"
                        hx-get="{% url 'dash_admin:dashboard' %}"
                        hx-target="#main-content"
@@ -74,31 +76,69 @@
                         <i class="fa fa-dashboard"></i><span>Dashboard</span>
                     </a>
                 </li>
-                <li id="nav-ajout" {% block nav_ajout %}{% endblock %}>
+
+                <!-- Séparateur -->
+                <li class="header">ÉVÉNEMENTS</li>
+
+                <!-- Ajouter un article -->
+                <li id="nav-ajout">
                     <a href="{% url 'dash_admin:ajout_article' %}"
                        hx-get="{% url 'dash_admin:ajout_article' %}"
                        hx-target="#main-content"
                        hx-push-url="true"
                        hx-swap="innerHTML"
                        onclick="setActive('nav-ajout')">
-                        <i class="fa fa-plus-circle"></i><span>Ajouter un Article</span>
+                        <i class="fa fa-plus-circle"></i><span>Ajouter un article</span>
                     </a>
                 </li>
-                <li id="nav-liste" {% block nav_liste %}{% endblock %}>
+
+                <!-- Liste des articles -->
+                <li id="nav-liste">
                     <a href="{% url 'dash_admin:liste_articles' %}"
                        hx-get="{% url 'dash_admin:liste_articles' %}"
                        hx-target="#main-content"
                        hx-push-url="true"
                        hx-swap="innerHTML"
                        onclick="setActive('nav-liste')">
-                        <i class="fa fa-list"></i><span>Liste des Articles</span>
+                        <i class="fa fa-list"></i><span>Liste des articles</span>
                     </a>
                 </li>
+
+                <!-- Séparateur -->
+                <li class="header">BLOG</li>
+
+                <!-- Ajouter un post blog -->
+                <li id="nav-blog-ajout">
+                    <a href="{% url 'dash_admin:ajout_blog' %}"
+                       hx-get="{% url 'dash_admin:ajout_blog' %}"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       hx-swap="innerHTML"
+                       onclick="setActive('nav-blog-ajout')">
+                        <i class="fa fa-pencil"></i><span>Nouvel article blog</span>
+                    </a>
+                </li>
+
+                <!-- Liste des posts blog -->
+                <li id="nav-blog-liste">
+                    <a href="{% url 'dash_admin:liste_blog' %}"
+                       hx-get="{% url 'dash_admin:liste_blog' %}"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       hx-swap="innerHTML"
+                       onclick="setActive('nav-blog-liste')">
+                        <i class="fa fa-newspaper-o"></i><span>Liste du blog</span>
+                    </a>
+                </li>
+
+                <!-- Déconnexion -->
+                <li class="header"></li>
                 <li>
                     <a href="{% url 'dash_admin:logout' %}">
                         <i class="fa fa-sign-out"></i><span>Déconnexion</span>
                     </a>
                 </li>
+
             </ul>
         </section>
     </aside>
@@ -119,11 +159,20 @@
         const el = document.getElementById(navId);
         if (el) el.classList.add('active');
     }
+
     document.addEventListener('DOMContentLoaded', function () {
         const p = window.location.pathname;
-        if      (p.includes('ajout'))    setActive('nav-ajout');
-        else if (p.includes('liste') || p.includes('voir') || p.includes('modifier')) setActive('nav-liste');
-        else    setActive('nav-dashboard');
+
+        // Événements
+        if      (p.includes('articles/ajout'))    setActive('nav-ajout');
+        else if (p.includes('articles/'))         setActive('nav-liste');
+
+        // Blog
+        else if (p.includes('blog/ajout'))        setActive('nav-blog-ajout');
+        else if (p.includes('blog/'))             setActive('nav-blog-liste');
+
+        // Dashboard
+        else                                      setActive('nav-dashboard');
     });
 </script>
 </body>
