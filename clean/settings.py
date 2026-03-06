@@ -193,3 +193,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/dash_admin/login/'
 LOGIN_REDIRECT_URL = '/dash_admin/'
 LOGOUT_REDIRECT_URL = '/dash_admin/login/'
+
+# ── Railway sert via un proxy HTTPS ──────────────────────────────────────────
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

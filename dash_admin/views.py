@@ -15,12 +15,16 @@ def api_articles(request):
     articles = Article.objects.all()
     data = []
     for article in articles:
+        image_url = None
+        if article.image:
+            image_url = request.build_absolute_uri(article.image.url)
+            image_url = image_url.replace('http://', 'https://')
         data.append({
             'id':          article.id,
             'titre':       article.titre,
             'description': article.description,
             'date_event':  article.date_event.strftime('%d %B').upper(),
-            'image':       request.build_absolute_uri(article.image.url) if article.image else None,
+            'image':       image_url,
         })
     return JsonResponse(data, safe=False)
 
@@ -32,6 +36,10 @@ def api_blog(request):
         posts = posts.filter(categorie=categorie)
     data = []
     for post in posts:
+        image_url = None
+        if post.image:
+            image_url = request.build_absolute_uri(post.image.url)
+            image_url = image_url.replace('http://', 'https://')
         data.append({
             'id':         post.id,
             'titre':      post.titre,
@@ -41,7 +49,7 @@ def api_blog(request):
             'tag':        post.tag_display,
             'readTime':   f"{post.read_time} min",
             'date':       post.date_formatee,
-            'image':      request.build_absolute_uri(post.image.url) if post.image else None,
+            'image':      image_url,
             'en_vedette': post.en_vedette,
         })
     return JsonResponse(data, safe=False)
@@ -49,6 +57,10 @@ def api_blog(request):
 
 def api_blog_detail(request, pk):
     post = get_object_or_404(BlogPost, pk=pk)
+    image_url = None
+    if post.image:
+        image_url = request.build_absolute_uri(post.image.url)
+        image_url = image_url.replace('http://', 'https://')
     data = {
         'id':         post.id,
         'titre':      post.titre,
@@ -58,7 +70,7 @@ def api_blog_detail(request, pk):
         'tag':        post.tag_display,
         'readTime':   f"{post.read_time} min",
         'date':       post.date_formatee,
-        'image':      request.build_absolute_uri(post.image.url) if post.image else None,
+        'image':      image_url,
         'en_vedette': post.en_vedette,
     }
     return JsonResponse(data)
