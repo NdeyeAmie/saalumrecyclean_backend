@@ -46,6 +46,7 @@ CSRF_TRUSTED_ORIGINS = [
 # CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://saalumrecyclean.netlify.app",
     "http://127.0.0.1:5173",
 ]
 
