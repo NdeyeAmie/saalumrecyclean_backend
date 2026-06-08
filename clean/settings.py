@@ -34,14 +34,14 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 # ── Déploiement / Production Settings ───────────────────────────────────────
 # Autoriser le domaine de Railway et localhost
 ALLOWED_HOSTS = [
-    "https://saalumrecyclean-backend.onrender.com",
+    "saalumrecyclean-backend.onrender.com",
     "127.0.0.1",
     "localhost",
 ]    
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://saalumrecyclean-backend.onrender.com",
+    "saalumrecyclean-backend.onrender.com",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
@@ -131,7 +131,7 @@ if DB_LIVE in ['False', False]:
     
 else:
     DATABASES = {
-    'default': {
+    'default': 
         dj_database_url.config(default=config('DATABASE_URL'))
          
         # 'ENGINE':   'django.db.backends.postgresql',
@@ -140,7 +140,7 @@ else:
         # 'PASSWORD': os.getenv('DB_PASSWORD'),  
         # 'HOST':     os.getenv('DB_HOST'),        
         # 'PORT':     os.getenv('DB_PORT'),             
-    }
+    
 }
 
 # Password validation
