@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config, Csv
 import os
+import dj_database_url
 
 from dotenv import load_dotenv
 load_dotenv()  # Charger les variables d'environnement à partir du fichier .env
@@ -24,7 +26,7 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o1=*ph#8+8axk=ys6w^p$oei1iyx(&x#d5(mm@598k5fdxk#^6'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +41,7 @@ ALLOWED_HOSTS = [
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://saalumrecycleanbackend-production.up.railway.app",
+    "*",
     "http://127.0.0.1:8000",
 ]
 
@@ -129,12 +131,14 @@ if DB_LIVE in ['False', False]:
 else:
     DATABASES = {
     'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':  os.getenv('DB_NAME'),     
-        'USER':     os.getenv('DB_USER'),        
-        'PASSWORD': os.getenv('DB_PASSWORD'),  
-        'HOST':     os.getenv('DB_HOST'),        
-        'PORT':     os.getenv('DB_PORT'),             
+        dj_database_url.config(default=config('DATABASE_URL'))
+         
+        # 'ENGINE':   'django.db.backends.postgresql',
+        # 'NAME':  os.getenv('DB_NAME'),     
+        # 'USER':     os.getenv('DB_USER'),        
+        # 'PASSWORD': os.getenv('DB_PASSWORD'),  
+        # 'HOST':     os.getenv('DB_HOST'),        
+        # 'PORT':     os.getenv('DB_PORT'),             
     }
 }
 
