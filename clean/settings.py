@@ -29,7 +29,7 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # ── Déploiement / Production Settings ───────────────────────────────────────
 # Autoriser le domaine de Railway et localhost
@@ -131,7 +131,7 @@ if DB_LIVE in ['False', False]:
 else:
     DATABASES = {
     'default': {
-        dj_database_url.config(default=config('DATABASES_URL'))
+        dj_database_url.config(default=config('DATABASE_URL'))
          
         # 'ENGINE':   'django.db.backends.postgresql',
         # 'NAME':  os.getenv('DB_NAME'),     
