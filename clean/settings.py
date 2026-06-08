@@ -34,13 +34,14 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 # ── Déploiement / Production Settings ───────────────────────────────────────
 # Autoriser le domaine de Railway et localhost
 ALLOWED_HOSTS = [
-    "saalumrecycleanbackend-production.up.railway.app",
+    "https://saalumrecyclean-backend.onrender.com",
     "127.0.0.1",
     "localhost",
 ]    
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = [
+    "https://saalumrecyclean-backend.onrender.com",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
