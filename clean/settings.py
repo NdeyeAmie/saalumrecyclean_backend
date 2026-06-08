@@ -117,7 +117,7 @@ WSGI_APPLICATION = 'clean.wsgi.application'
 DB_LIVE = os.getenv('DB_LIVE')
 
 # Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases  
 
 if DB_LIVE in ['False', False]:
 
