@@ -131,7 +131,7 @@ if DB_LIVE in ['False', False]:
 else:
     DATABASES = {
     'default': {
-        dj_database_url.config(default=config('DATABASE_URL'))
+        dj_database_url.config(default=config('DATABASES_URL'))
          
         # 'ENGINE':   'django.db.backends.postgresql',
         # 'NAME':  os.getenv('DB_NAME'),     
