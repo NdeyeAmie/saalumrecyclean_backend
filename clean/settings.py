@@ -41,7 +41,7 @@ ALLOWED_HOSTS = [
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "saalumrecyclean-backend.onrender.com",
+    "https://saalumrecyclean-backend.onrender.com/",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
@@ -50,6 +50,7 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://saalumrecyclean.netlify.app",
+    "https://saalumrecyclean.vercel.app",
     "http://127.0.0.1:5173",
 ]
 
