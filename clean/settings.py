@@ -52,6 +52,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://saalumrecyclean.netlify.app",
     "https://saalumrecyclean.vercel.app",
     "http://127.0.0.1:5173",
+    "https://www.saalumrecyclean.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
